@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../models/user_profile.dart';
 import '../providers/app_providers.dart';
-import '../services/user_profile_service.dart';
 import '../config/app_theme.dart';
 
-class ProfileScreen extends HookConsumerWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
@@ -18,247 +15,394 @@ class ProfileScreen extends HookConsumerWidget {
     final userStatsAsyncValue = ref.watch(userStatsProvider(userId ?? ''));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_rounded),
-            onPressed: () {
-              context.push('/edit-profile');
-            },
-          ),
-        ],
-      ),
-      body: userProfileAsyncValue.when(
-        data: (profile) {
-          if (profile == null) {
-            return const Center(child: Text('Profile not found'));
-          }
+      body: SafeArea(
+        child: userProfileAsyncValue.when(
+          data: (profile) {
+            if (profile == null) {
+              return const Center(child: Text('Profile not found'));
+            }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+            return Column(
               children: [
-                // Profile Header
-                Card(
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                // Modern header with gradient
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppTheme.primaryColor, Color(0xFFFF6B35)],
+                    ),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
+                    ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundColor: AppTheme.secondaryColor.withOpacity(
-                            0.2,
-                          ),
-                          backgroundImage: profile.avatarUrl != null
-                              ? NetworkImage(profile.avatarUrl!)
-                              : null,
-                          child: profile.avatarUrl == null
-                              ? Text(
-                                  profile.initials,
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.primaryColor,
+                        // Header row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'My Profile',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.edit_rounded,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  context.push('/edit-profile');
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+
+                        // Profile Avatar and Info
+                        Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 4,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
                                   ),
-                                )
-                              : null,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          profile.displayName,
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                        if (profile.username != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            '@${profile.username}',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
-                        const SizedBox(height: 8),
-                        Text(
-                          profile.email,
-                          style: Theme.of(context).textTheme.bodySmall,
+                                ],
+                              ),
+                              child: CircleAvatar(
+                                radius: 60,
+                                backgroundColor: Colors.white,
+                                backgroundImage: profile.avatarUrl != null
+                                    ? NetworkImage(profile.avatarUrl!)
+                                    : null,
+                                child: profile.avatarUrl == null
+                                    ? Text(
+                                        profile.initials,
+                                        style: const TextStyle(
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.primaryColor,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              profile.displayName,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            if (profile.username != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                '@${profile.username}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white.withOpacity(0.9),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                profile.email,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                // Content area
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        // Stats Card
+                        userStatsAsyncValue.when(
+                          data: (stats) {
+                            if (stats == null) return const SizedBox.shrink();
 
-                // Stats Card
-                userStatsAsyncValue.when(
-                  data: (stats) {
-                    if (stats == null) return const SizedBox.shrink();
-
-                    return Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildStatItem(
-                              context,
-                              'Recipes',
-                              stats['total_recipes']?.toString() ?? '0',
-                              Icons.restaurant_menu_rounded,
-                            ),
-                            _buildStatItem(
-                              context,
-                              'Level',
-                              profile.cookingLevel.capitalize(),
-                              Icons.star_rounded,
-                            ),
-                            _buildStatItem(
-                              context,
-                              'Joined',
-                              DateFormat('MMM yyyy').format(profile.createdAt),
-                              Icons.calendar_today_rounded,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                  loading: () => const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
-                  ),
-                  error: (_, __) => const SizedBox.shrink(),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Profile Details
-                Card(
-                  child: Column(
-                    children: [
-                      if (profile.bio != null && profile.bio!.isNotEmpty)
-                        ListTile(
-                          leading: const Icon(Icons.info_outline),
-                          title: const Text('Bio'),
-                          subtitle: Text(profile.bio!),
-                        ),
-
-                      if (profile.phoneNumber != null &&
-                          profile.phoneNumber!.isNotEmpty)
-                        ListTile(
-                          leading: const Icon(Icons.phone),
-                          title: const Text('Phone'),
-                          subtitle: Text(profile.phoneNumber!),
-                        ),
-
-                      if (profile.dateOfBirth != null)
-                        ListTile(
-                          leading: const Icon(Icons.cake),
-                          title: const Text('Date of Birth'),
-                          subtitle: Text(
-                            DateFormat(
-                              'MMMM d, yyyy',
-                            ).format(profile.dateOfBirth!),
-                          ),
-                        ),
-
-                      if (profile.favoriteCuisine != null &&
-                          profile.favoriteCuisine!.isNotEmpty)
-                        ListTile(
-                          leading: const Icon(Icons.favorite),
-                          title: const Text('Favorite Cuisine'),
-                          subtitle: Text(profile.favoriteCuisine!),
-                        ),
-
-                      if (profile.dietaryPreferences.isNotEmpty)
-                        ListTile(
-                          leading: const Icon(Icons.local_dining),
-                          title: const Text('Dietary Preferences'),
-                          subtitle: Wrap(
-                            spacing: 4,
-                            children: profile.dietaryPreferences
-                                .map(
-                                  (pref) => Chip(
-                                    label: Text(pref.capitalize()),
-                                    materialTapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
+                            return Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
                                   ),
-                                )
-                                .toList(),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  _buildModernStatItem(
+                                    context,
+                                    'Recipes',
+                                    stats['total_recipes']?.toString() ?? '0',
+                                    Icons.restaurant_menu,
+                                    AppTheme.primaryColor,
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 40,
+                                    color: AppTheme.surfaceColor,
+                                  ),
+                                  _buildModernStatItem(
+                                    context,
+                                    'Level',
+                                    profile.cookingLevel.capitalize(),
+                                    Icons.star,
+                                    AppTheme.accentColor,
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 40,
+                                    color: AppTheme.surfaceColor,
+                                  ),
+                                  _buildModernStatItem(
+                                    context,
+                                    'Joined',
+                                    DateFormat(
+                                      'MMM yyyy',
+                                    ).format(profile.createdAt),
+                                    Icons.calendar_today,
+                                    AppTheme.secondaryColor,
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          loading: () => Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                          error: (_, __) => const SizedBox.shrink(),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Profile Details
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.all(24),
+                                child: Text(
+                                  'Profile Details',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textPrimaryColor,
+                                  ),
+                                ),
+                              ),
+                              if (profile.bio != null &&
+                                  profile.bio!.isNotEmpty)
+                                _buildModernDetailItem(
+                                  context,
+                                  'Bio',
+                                  profile.bio!,
+                                  Icons.info_outline,
+                                  AppTheme.primaryColor,
+                                ),
+                              if (profile.phoneNumber != null &&
+                                  profile.phoneNumber!.isNotEmpty)
+                                _buildModernDetailItem(
+                                  context,
+                                  'Phone',
+                                  profile.phoneNumber!,
+                                  Icons.phone,
+                                  AppTheme.secondaryColor,
+                                ),
+                              if (profile.dateOfBirth != null)
+                                _buildModernDetailItem(
+                                  context,
+                                  'Date of Birth',
+                                  DateFormat(
+                                    'MMMM d, yyyy',
+                                  ).format(profile.dateOfBirth!),
+                                  Icons.cake,
+                                  AppTheme.accentColor,
+                                ),
+                              _buildModernDetailItem(
+                                context,
+                                'Cooking Level',
+                                profile.cookingLevel.capitalize(),
+                                Icons.local_fire_department,
+                                AppTheme.primaryColor,
+                              ),
+                              const SizedBox(height: 12),
+                            ],
                           ),
                         ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Settings
-                Card(
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.edit),
-                        title: const Text('Edit Profile'),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () {
-                          context.push('/edit-profile');
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.settings),
-                        title: const Text('Settings'),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () {
-                          // TODO: Navigate to settings
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.logout, color: Colors.red),
-                        title: const Text(
-                          'Sign Out',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                        onTap: () async {
-                          final authService = ref.read(authServiceProvider);
-                          await authService.signOut();
-                          ref.read(currentUserProvider.notifier).state = null;
-                          if (context.mounted) {
-                            context.go('/signin');
-                          }
-                        },
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
-            ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: ${err.toString()}')),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text('Error: $error')),
+        ),
       ),
     );
   }
 
-  Widget _buildStatItem(
+  Widget _buildModernStatItem(
     BuildContext context,
     String label,
     String value,
     IconData icon,
+    Color color,
   ) {
     return Column(
       children: [
-        Icon(icon, color: AppTheme.primaryColor, size: 28),
-        const SizedBox(height: 4),
-        Text(value, style: Theme.of(context).textTheme.titleLarge),
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimaryColor,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppTheme.textSecondaryColor,
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildModernDetailItem(
+    BuildContext context,
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textSecondaryColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: AppTheme.textPrimaryColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
