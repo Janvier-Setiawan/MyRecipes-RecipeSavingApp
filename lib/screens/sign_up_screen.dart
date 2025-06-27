@@ -123,8 +123,8 @@ class SignUpScreen extends HookConsumerWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFFFFF8F0), // Light peach
-                  Color(0xFFFFEFE7), // Lighter peach
+                  Color(0xFFFFF8E1), // Cream background
+                  Color(0xFFFFF3E0), // Light orange
                 ],
               ),
             ),

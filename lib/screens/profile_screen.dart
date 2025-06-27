@@ -30,7 +30,7 @@ class ProfileScreen extends ConsumerWidget {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [AppTheme.primaryColor, Color(0xFFFF6B35)],
+                      colors: [AppTheme.primaryColor, AppTheme.accentColor],
                     ),
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(30),

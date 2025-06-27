@@ -43,7 +43,7 @@ class HomeScreen extends HookConsumerWidget {
                   end: Alignment.bottomRight,
                   colors: [
                     AppTheme.primaryColor,
-                    Color(0xFFFF6B35), // Gradient variation
+                    AppTheme.accentColor, // Warm yellow gradient
                   ],
                 ),
                 borderRadius: BorderRadius.only(
