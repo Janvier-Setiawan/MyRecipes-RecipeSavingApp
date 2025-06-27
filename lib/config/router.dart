@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/recipe.dart';
 import '../screens/add_recipe_screen.dart';
+import '../screens/edit_profile_screen.dart';
 import '../screens/get_started_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/profile_screen.dart';
@@ -62,6 +63,10 @@ final router = GoRouter(
         GoRoute(
           path: '/profile',
           builder: (context, state) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/edit-profile',
+          builder: (context, state) => const EditProfileScreen(),
         ),
       ],
     ),
