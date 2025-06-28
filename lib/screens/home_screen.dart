@@ -131,7 +131,7 @@ class HomeScreen extends HookConsumerWidget {
                         const SizedBox(width: 12),
                         const Expanded(
                           child: Text(
-                            'What delicious dish will you create today?',
+                            'What delicious dish will you recook today?',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
